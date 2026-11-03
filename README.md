@@ -16,23 +16,35 @@ DSH plugin: Right sidebar overlay layout - changes right panel from push to over
 - 补一道浮层阴影，视觉层次更清晰
 - 收起（`data-rightbar-collapsed`）与全屏（`data-rightbar-fullscreen`）状态不受影响
 
-## 安装
+## 安装与挂载
 
 ```bash
 pnpm add @goodjin2/dsh-rightbar-overlay
 ```
 
-## 使用
+在 profile 的 `dsh.profile.bundles` 里加上 `@goodjin2/dsh-rightbar-overlay` 即可。
+本包自带 `cordis.patch.yml`（`dsh.bundle.patch`），里面是一条**裸包名**的装载行：
 
-在 DSH 配置中启用插件：
-
-```typescript
-import rightbarOverlay from '@goodjin2/dsh-rightbar-overlay/client'
-
-export default {
-  plugins: [rightbarOverlay],
-}
+```yaml
+- insert:
+    - id: rightbar-overlay-client
+      name: '@goodjin2/dsh-rightbar-overlay'
 ```
+
+两处不能写错，否则装上等于没装（而且不报错）：
+
+- **行名必须是裸包名。** DSH 只把 name 恰好等于包名的 Loader 行认成浏览器行
+  （`ClientModuleRegistry.resolveMeta` 经 `locatePkgJson` 解析）；带 `/client`
+  子路径的名字会被判掉，那行退化成在 node 里 import 浏览器产物，右侧栏回到官方
+  的「推挤」布局。
+- **package.json 必须同时声明 `dsh.bundle.patch` 与 `dsh.client.platform = "web"`。**
+  前者缺失时 profile 会直接跳过整个 bundle（app-boot 读 profile 时的跳过分支）；
+  后者缺失时客户端模块注册表不把这行认成浏览器行。
+
+`exports["./client"]` 也要写成宿主认的形状：字符串，或带字符串 `default` 的对象
+（`clientExportOf` 只认这两种，只有 `import`/`require` 会被当场判错）。
+
+浏览器半边的产物是 `lib/client.js`，随库提交（`npm run build` 重建）。
 
 ## 开关
 
@@ -52,7 +64,12 @@ localStorage.setItem('rightbarOverlay.enabled', 'off')
 
 ## 从 threadharbor 迁移
 
-本插件从 `@goodjin2/threadharbor` 迁移出来（2026-11-02），作为独立插件。原功能代码在 `threadharbor/src/rightbar-overlay.ts`。
+本插件从 `@goodjin2/threadharbor` 迁移出来（2026-11-02），作为独立插件。
+threadharbor 里的那份已在 2026-11-03 删除，避免两份覆盖层同时生效
+（两者都用 `!important` 网格模板，同时装会互相抢）。
+
+开关的存储键也一并换了：老版是 `threadharbor.rightbarOverlay`，本插件是
+`rightbarOverlay.enabled`。以前设过 off 的机器要重新设一次。
 
 ## 许可
 

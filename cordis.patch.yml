@@ -1,0 +1,16 @@
+# @goodjin2/dsh-rightbar-overlay 的挂载配置。
+#
+# 一条装载行，把本包的浏览器半边挂进页面。
+#
+# 行名必须是**裸包名**（`@goodjin2/dsh-rightbar-overlay`）：DSH 扫的是 Loader 的
+# 行，只有 name 恰好等于包名的行才会被认成浏览器行（ClientModuleRegistry.resolveMeta
+# 经 locatePkgJson 解析）。带子路径的名字既不是包根、也被 exactPackageSpecifier 判掉，
+# 于是那行会退化成在 node 里 import 浏览器产物——结果是右侧栏回到官方的「推挤」布局，
+# 而且不报任何错。2026-11-03 在本包上刚踩过：package.json 缺 dsh.bundle 与
+# dsh.client 声明，profile 直接跳过整个 bundle，装上等于没装。
+#
+# 宿主侧的半边（lib/index.js）不做任何事——这个插件只操作页面 DOM。
+
+- insert:
+    - id: rightbar-overlay-client
+      name: '@goodjin2/dsh-rightbar-overlay'

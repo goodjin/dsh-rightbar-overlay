@@ -5,23 +5,20 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./lib/types/index.d.ts",
-      "import": "./lib/index.js",
-      "require": "./lib/index.cjs"
+      "types": "./src/entry.ts",
+      "default": "./src/entry.ts"
     },
     "./client": {
-      "types": "./lib/types/index.d.ts",
-      "default": "./lib/client.js",
-      "import": "./lib/client.js",
-      "require": "./lib/client.cjs"
+      "types": "./src/client.ts",
+      "default": "./lib/client.js"
     },
     "./package.json": "./package.json"
   },
-  "main": "./lib/index.cjs",
-  "module": "./lib/index.js",
-  "types": "./lib/types/index.d.ts",
+  "main": "./src/entry.ts",
+  "types": "./src/entry.ts",
   "files": [
     "lib",
+    "src",
     "cordis.patch.yml",
     "README.md",
     "package.json"

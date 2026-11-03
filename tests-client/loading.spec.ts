@@ -56,4 +56,28 @@ describe('装载接线', () => {
     expect(target).toBe('./lib/client.js')
     expect(existsSync(resolve(root, target!))).toBe(true)
   })
+
+  it('产物是 ModuleLoader 工厂：单文件 CJS，外面套一层 window.__ModuleLoader__.load', () => {
+    // 页面把 exports["./client"] 那个文件当**普通脚本**加载，模块表靠
+    // window.__ModuleLoader__.load({id, factory}) 收它。产物若是普通 ESM 模块
+    // （顶层 import），页面直接报语法错误，浏览器半边整块不注册；宿主那一行
+    // 随后被判成导入失败，包不进启动图——界面上一个字都没有（2026-11 现场）。
+    const bundle = readFileSync(resolve(root, 'lib/client.js'), 'utf8')
+    // 产物是压缩过的，断言按形状来，不按具体文本（引号、空格都被压掉了）。
+    expect(bundle).toMatch(/window\.__ModuleLoader__\.load\(\{[^}]*factory/)
+    expect(bundle).toContain(manifest.name!)
+    // 工厂要把自己交回去：结尾是 load(...) 的收尾。
+    expect(bundle).toMatch(/\}\}\);(\s*\/\/# sourceMappingURL=.*)?$/)
+    // 顶层 import/export 是 ESM 的标志：单文件 CJS 工厂里不能有。
+    expect(/^\s*(import|export)\s/m.test(bundle)).toBe(false)
+  })
+
+  it('宿主入口是源码里的空 apply，浏览器代码不混进宿主进程', () => {
+    // 包的 "." 入口由宿主进程 import：它必须是宿主侧入口（空 apply），
+    // 而不是浏览器产物或别的东西。chat-area/acp-agent 同款。
+    const main = manifest.exports?.['.'] as { default?: string } | undefined
+    expect(main?.default).toBe('./src/entry.ts')
+    const entry = readFileSync(resolve(root, 'src/entry.ts'), 'utf8')
+    expect(entry).toContain('export function apply()')
+  })
 })

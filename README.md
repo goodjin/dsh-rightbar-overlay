@@ -44,6 +44,21 @@ pnpm add @goodjin2/dsh-rightbar-overlay
 `exports["./client"]` 也要写成宿主认的形状：字符串，或带字符串 `default` 的对象
 （`clientExportOf` 只认这两种，只有 `import`/`require` 会被当场判错）。
 
+### 产物形状：单文件 CJS 工厂（这一条最容易踩）
+
+页面把 `exports["./client"]` 指向的那个文件当**普通脚本**加载，模块表靠
+`window.__ModuleLoader__.load({ id, factory })` 收它。所以那个文件必须是
+「单文件 CJS 工厂」，外面套一层 load，factory 里把 `apply`/`name`/`inject`
+挂到 `module.exports` 上——与 DSH 自带的客户端插件、以及 `dsh-chat-area` /
+`dsh-acp-agent` 的产物同款。
+
+产物若是普通 ESM 模块（顶层 `import`/`export`），页面直接报语法错误，浏览器
+半边整块不注册；宿主那一行随后被判成导入失败，包**根本不会进启动图**，
+界面上一个字都没有（2026-11-03 现场：这个包就是这么"装上了却不生效"的）。
+
+包的 `.` 入口（宿主进程 import 的那个）要指向 `src/entry.ts`——一个空的
+`apply`，浏览器代码不许混进宿主进程。
+
 浏览器半边的产物是 `lib/client.js`，随库提交（`npm run build` 重建）。
 
 ## 开关

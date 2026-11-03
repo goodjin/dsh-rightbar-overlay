@@ -3,3 +3,6 @@ lib/
 dist/
 *.log
 .DS_Store
+
+# 本地工作树目录（agent 隔离开发用）
+.worktrees/

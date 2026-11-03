@@ -1,0 +1,59 @@
+{
+  "name": "@goodjin2/dsh-rightbar-overlay",
+  "version": "0.1.0",
+  "description": "DSH plugin: Right sidebar overlay layout - changes right panel from push to overlay mode",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "import": "./lib/index.js",
+      "require": "./lib/index.cjs"
+    },
+    "./client": {
+      "types": "./lib/types/index.d.ts",
+      "import": "./lib/client.js",
+      "require": "./lib/client.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./lib/index.cjs",
+  "module": "./lib/index.js",
+  "types": "./lib/types/index.d.ts",
+  "files": [
+    "lib",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build": "tsdown"
+  },
+  "keywords": [
+    "deepseek",
+    "harness",
+    "dsh",
+    "plugin",
+    "rightbar",
+    "overlay",
+    "layout"
+  ],
+  "author": "goodjin",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "sideEffects": [
+    "*.css",
+    "lib/client.js"
+  ],
+  "devDependencies": {
+    "@deepseek-ai/dsh-client-ui-renderer": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-layout": "0.2.0-rc.2",
+    "@types/node": "^24.0.0",
+    "jsdom": "^27.0.0",
+    "tsdown": "^0.15.12",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

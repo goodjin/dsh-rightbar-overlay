@@ -1,15 +1,17 @@
 /**
- * 右侧栏覆盖布局：DSH 的右侧栏（终端/文件/预览/浏览器）默认「推挤」呈现——
+ * 右侧栏接管会话区：DSH 的右侧栏（终端/文件/预览/浏览器）默认「推挤」呈现——
  * 展开时布局帧把第三条网格轨道用剩余空间撑开（轨道定宽上限，与内容无关），
  * 会话区让位、左右分成两栏。
  *
- * 这个模块只补这一处，把推挤改成「覆盖」：
+ * 这个模块只补这一处，把推挤改成「接管」：
  * - 桌面宽度（>1023，与 mobile-layout 的抽屉模式分界）且右侧栏推挤展开时，
  *   用一条 !important 的网格模板把第三条轨道压回 0、会话区占满剩余宽度；
- * - 右侧栏面板本来就被绝对定位钉在布局帧右缘、宽度来自自己的内联样式，
- *   轨道归零后它自然叠在会话区上方，补一道浮层影子即可；
- * - 第一条轨道（侧栏列）是动态值，镜像进一个 CSS 变量，React 每次重写
- *   frame 的内联样式就跟一次；
+ * - 面板**接管整个会话区**，不是浮在会话区上面：右侧栏列原本是面板的定位
+ *   上下文（position: relative），把它撤成 static，面板就改为相对布局帧定位——
+ *   左缘对齐会话列左缘、右缘仍是帧右缘、宽度由两端拉满。于是面板铺满会话区，
+ *   会话区在它背后（收起时原样回来）；
+ * - 第一条轨道（侧栏列）是动态值，镜像进一个 CSS 变量，网格模板与面板左缘
+ *   都用它，React 每次重写 frame 的内联样式就跟一次；
  * - 收起（data-rightbar-collapsed）与全屏（data-rightbar-fullscreen）两个
  *   状态由 DSH 布局服务自己维护，样式用 :not() 守卫，一概不碰；
  * - localStorage `rightbarOverlay.enabled` = 'off' 时整个模块不装，
@@ -42,8 +44,19 @@ const OVERLAY_CSS = `
   [${RIGHTBAR_FRAME_ATTR}]:not([data-rightbar-collapsed]):not([data-rightbar-fullscreen]) {
     grid-template-columns: var(${SIDEBAR_TRACK_VAR}, 280px) minmax(0, 1fr) 0px !important;
   }
+  /* 右侧栏列是面板的定位上下文（position: relative）。撤掉它，面板就改为相对
+     布局帧定位——左缘才能落到会话列左缘，而不是被钉在 0 宽的列里。 */
+  [${RIGHTBAR_FRAME_ATTR}]:not([data-rightbar-collapsed]):not([data-rightbar-fullscreen]) [data-rightbar-col] {
+    position: static !important;
+  }
+  /* 接管整个会话区：左缘 = 会话列左缘，右缘 = 帧右缘，宽度由两端拉满。
+     面板自己的内联宽度（它的宿主给的请求宽）在这里被覆盖。 */
   [${RIGHTBAR_FRAME_ATTR}]:not([data-rightbar-collapsed]):not([data-rightbar-fullscreen]) [data-sidebar-right-panel='push'] {
-    box-shadow: -12px 0 32px rgba(0, 0, 0, 0.22);
+    left: var(${SIDEBAR_TRACK_VAR}, 280px) !important;
+    right: 0 !important;
+    width: auto !important;
+    /* 不再是浮在会话区上面的一层：没有浮层影子。 */
+    box-shadow: none !important;
   }
 }
 `

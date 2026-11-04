@@ -39,6 +39,20 @@ describe('rightbar-overlay', () => {
     overlay.dispose()
   })
 
+  it('should take over the conversation area instead of floating over it', () => {
+    // 面板接管整个会话区：右侧栏列不再是定位上下文（position: static），
+    // 面板改为相对布局帧定位——左缘对齐会话列左缘，右缘是帧右缘，宽度铺满。
+    const overlay = startRightbarOverlay()
+    const css = document.getElementById('rightbar-overlay-style')?.textContent ?? ''
+    expect(css).toContain('position: static')
+    expect(css).toContain('left: var(--rightbar-sidebar-track')
+    expect(css).toContain('width: auto')
+    // 不再是浮层：没有浮层影子。
+    expect(css).toContain('box-shadow: none')
+    expect(css).not.toContain('box-shadow: -12px')
+    overlay.dispose()
+  })
+
   it('should mark the frame with overlay attribute', () => {
     const overlay = startRightbarOverlay()
     expect(frame.hasAttribute('data-rightbar-overlay')).toBe(true)

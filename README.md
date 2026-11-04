@@ -1,19 +1,22 @@
 # @goodjin2/dsh-rightbar-overlay
 
-DSH plugin: Right sidebar overlay layout - changes right panel from push to overlay mode.
+DSH plugin: the right sidebar takes over the conversation area instead of squeezing it.
 
 ## 功能
 
-将 DSH 的右侧栏（终端/文件/预览/浏览器）从默认的「推挤」模式改为「覆盖」模式：
+将 DSH 的右侧栏（终端/文件/预览/浏览器）从默认的「推挤」模式改为「接管会话区」：
 
 - **推挤模式**（默认）：右侧栏展开时，会话区宽度被压缩，左右分成两栏
-- **覆盖模式**（本插件）：右侧栏展开时，会话区保持全宽，右侧栏浮在会话区上方
+- **接管模式**（本插件）：右侧栏展开时，面板铺满整个会话区（左缘对齐会话列左缘、
+  右缘是窗口右缘），会话区在它背后
 
 ## 工作原理
 
-- 桌面宽度（>1023px）且右侧栏推挤展开时，用 CSS 网格模板把右侧栏轨道压回 0
-- 右侧栏面板本来就被绝对定位钉在布局帧右缘，轨道归零后自然叠在会话区上方
-- 补一道浮层阴影，视觉层次更清晰
+- 桌面宽度（>1023px）且右侧栏推挤展开时，用 CSS 网格模板把右侧栏轨道压回 0，
+  会话区保持整宽
+- 右侧栏列是面板的定位上下文（`position: relative`）；把它撤成 `static`，面板就
+  改为相对布局帧定位——左缘落到会话列左缘、右缘是帧右缘、宽度由两端拉满
+- 侧栏列轨道宽度是动态值，镜像进一个 CSS 变量，网格模板与面板左缘都用它
 - 收起（`data-rightbar-collapsed`）与全屏（`data-rightbar-fullscreen`）状态不受影响
 
 ## 安装与挂载
